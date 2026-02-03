@@ -1,0 +1,24 @@
+# Python bytecode (Derlenmiş dosyalar)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Sanal ortam (Virtual Environment)
+venv/
+.venv/
+env/
+bin/
+lib/
+
+# Flask/Django ve Gizli bilgiler (API Key vb.)
+instance/
+.webassets-cache
+.env
+.flaskenv
+
+# VS Code özel ayarlar
+.vscode/
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db
