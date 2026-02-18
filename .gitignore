@@ -18,6 +18,7 @@ instance/
 
 # VS Code özel ayarlar
 .vscode/
+.idea/
 
 # İşletim sistemi dosyaları
 .DS_Store
