@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riot Stats Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-gray-700">
+        
+        <div class="mb-8">
+            <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 mb-2">
+                Riot Stats Tracker
+            </h1>
+            <p class="text-gray-400 text-sm">Enter your Riot ID to analyze your recent match performance.</p>
+        </div>
+
+        {% if error == 'not_found' %}
+        <div class="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-3">
+            <span>⚠️</span>
+            <p class="text-left">Player not found! Please check the spelling, tagline, and region.</p>
+        </div>
+        {% endif %}
+
+        <form id="searchForm" class="flex flex-col gap-4">
+            <select id="region" class="bg-gray-900 text-white p-3 rounded-lg border border-gray-600 focus:outline-none focus:border-indigo-500">
+                <option value="tr1">Turkey (TR)</option>
+                <option value="euw1">Western Europe (EUW)</option>
+                <option value="na1">North America (NA)</option>
+            </select>
+
+            <div class="flex gap-2">
+                <input type="text" id="game_name" placeholder="In-Game Name (e.g., Faker)" required 
+                       class="bg-gray-900 text-white p-3 rounded-lg border border-gray-600 focus:outline-none focus:border-indigo-500 flex-1">
+                
+                <input type="text" id="tag_line" placeholder="Tagline (e.g., TR1)" required 
+                       class="bg-gray-900 text-white p-3 rounded-lg border border-gray-600 focus:outline-none focus:border-indigo-500 w-1/3">
+            </div>
+
+            <button type="submit" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-lg shadow-indigo-500/50">
+                🔍 Fetch Stats
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            
+            const region = document.getElementById("region").value;
+            const game_name = document.getElementById("game_name").value;
+            let tag_line = document.getElementById("tag_line").value;
+            
+            tag_line = tag_line.replace("#", "");
+            window.location.href = `/player/${region}/${game_name}/${tag_line}`;
+        });
+    </script>
+</body>
+</html>
