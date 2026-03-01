@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStore | Modern E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.location.href='/'">
+                    <i class="fa-solid fa-microchip text-2xl mr-2"></i>
+                    <span class="font-black text-xl tracking-wider">TechStore</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div id="auth-buttons" class="space-x-4">
+                        <button onclick="window.location.href='/login'"
+                            class="text-indigo-100 hover:text-white font-medium transition">Sign In</button>
+                        <button onclick="window.location.href='/register'"
+                            class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-bold hover:bg-indigo-50 transition shadow-sm">Sign
+                            Up</button>
+                    </div>
+                    <button onclick="window.location.href='/cart'"
+                        class="relative text-white hover:text-indigo-200 transition">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                        <span id="cart-count"
+                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-white shadow-sm mb-8 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Tomorrow's Technology, At Your Door Today.</h1>
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto">The latest hardware, gaming equipment, and premium
+                devices with the best price guarantee.</p>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mb-12">
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div class="col-span-full text-center py-10" id="loading-spinner">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-500"></i>
+                <p class="mt-4 text-gray-500 font-medium">Loading products...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400">© 2026 TechStore API. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+            checkLoginStatus();
+        });
+
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/products/');
+                const products = await response.json();
+
+                const grid = document.getElementById('products-grid');
+                grid.innerHTML = '';
+
+                if (products.length === 0) {
+                    grid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products have been added to the store yet.</p>';
+                    return;
+                }
+
+
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col";
+
+
+                    const imageUrl = product.image_url || 'https://via.placeholder.com/400x300?text=No+Image';
+
+                    const stockBadge = product.stock === 0
+                        ? `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-red-100 text-red-600"><i class="fa-solid fa-circle-xmark"></i> Out of Stock</span>`
+                        : product.stock <= 5
+                            ? `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-orange-100 text-orange-600"><i class="fa-solid fa-triangle-exclamation"></i> Only ${product.stock} left</span>`
+                            : `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-600"><i class="fa-solid fa-circle-check"></i> In Stock (${product.stock})</span>`;
+
+                    const cartBtnDisabled = product.stock === 0
+                        ? `disabled title="Out of stock" class="bg-gray-300 text-gray-400 p-2 rounded-lg cursor-not-allowed"`
+                        : `onclick="addToCart(${product.id})" class="bg-gray-900 text-white p-2 rounded-lg hover:bg-indigo-600 transition-colors"`;
+
+                    card.innerHTML = `
+                        <img src="${imageUrl}" alt="${product.title}" class="w-full h-48 object-cover">
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">${product.title}</h3>
+                            <p class="text-sm text-gray-500 mb-3 flex-grow">${product.description.substring(0, 80)}...</p>
+                            <div class="mb-3">${stockBadge}</div>
+                            <div class="flex items-center justify-between mt-auto">
+                                <span class="text-2xl font-black text-indigo-600">$${product.price.toFixed(2)}</span>
+                                <button ${cartBtnDisabled}>
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error while fetching products:", error);
+                document.getElementById('products-grid').innerHTML = '<p class="col-span-full text-center text-red-500">Products could not be loaded. Please check your server connection.</p>';
+            }
+        }
+
+
+        function checkLoginStatus() {
+            const token = localStorage.getItem('access_token');
+            const authButtons = document.getElementById('auth-buttons');
+
+            if (token) {
+
+                authButtons.innerHTML = `
+                    <button onclick="logout()" class="text-indigo-100 hover:text-white font-medium transition">Sign Out</button>
+                `;
+            }
+        }
+
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.reload();
+        }
+
+
+        async function addToCart(productId) {
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                alert("Please sign in to add products to your cart!");
+                return;
+            }
+
+            try {
+
+                const response = await fetch(`/cart/add/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Product successfully added to cart!");
+
+                } else if (response.status === 401) {
+                    alert("Your session has expired. Please sign in again.");
+                    logout();
+                } else {
+                    const errorData = await response.json();
+                    alert("Error: " + (errorData.detail || "An unknown error occurred"));
+                }
+            } catch (error) {
+                console.error("Error adding to cart:", error);
+            }
+        }
+    </script>
+</body>
+
+</html>
